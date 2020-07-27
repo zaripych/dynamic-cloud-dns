@@ -1,0 +1,54 @@
+{
+  "name": "dynamic-cloud-dns",
+  "version": "1.0.0",
+  "description": "Dynamically change Cloud DNS entries",
+  "license": "MIT",
+  "author": "@zaripych",
+  "main": "lib/index.js",
+  "scripts": {
+    "prebuild": "node ./scripts/clean.js",
+    "build": "node ./scripts/build.js -s",
+    "check": "concurrently --raw -c \"node ./scripts/build.js\" \"tsc\" \"eslint . --ext .js,.jsx,.ts,.tsx -f pretty\"",
+    "clean": "node ./scripts/clean.js",
+    "combine-coverage": "node ./scripts/combineCoverage.js",
+    "declarations": "tsc -p ./tsconfig.declarations.json",
+    "eslint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "integration": "jest --config ./jest.config.integration.js --color -i",
+    "lint": "yarn run eslint -f pretty",
+    "patch": "ts-deps patch",
+    "release": "node ./scripts/release.js",
+    "test": "jest --color",
+    "type-check": "tsc",
+    "ci-build-docker": "docker build -t zaripych/$npm_package_name ."
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-push": "yarn run check"
+    }
+  },
+  "lint-staged": {
+    "*.{tsx,jsx,ts,js,json,md,yaml,yml}": [
+      "prettier --write"
+    ],
+    "package.json": [
+      "sort-package-json"
+    ]
+  },
+  "devDependencies": {
+    "@types/express": "4.17.7",
+    "husky": "4.2.3",
+    "lint-staged": "10.0.8",
+    "ts-deps": "0.15.9"
+  },
+  "dependencies": {
+    "@types/node-fetch": "2.5.7",
+    "@types/wtfnode": "0.7.0",
+    "express": "4.17.1",
+    "googleapis": "56.0.0",
+    "node-fetch": "2.6.0",
+    "rxjs": "6.6.0",
+    "wtfnode": "0.8.1"
+  }
+}

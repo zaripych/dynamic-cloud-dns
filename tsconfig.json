@@ -1,0 +1,5 @@
+{
+  "extends": "./node_modules/ts-deps/lib/config/tsconfig.default.json",
+  "compilerOptions": { "baseUrl": ".", "outDir": "lib" },
+  "include": ["src"]
+}
