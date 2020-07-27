@@ -8,6 +8,12 @@ module.exports = {
     [
       '@semantic-release/exec',
       {
+        prepareCmd: 'yarn run ci-build-docker',
+      },
+    ],
+    [
+      '@semantic-release/exec',
+      {
         verifyReleaseCmd:
           'docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD',
         publishCmd:
