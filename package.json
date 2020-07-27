@@ -1,6 +1,7 @@
 {
   "name": "dynamic-cloud-dns",
   "version": "1.0.0",
+  "private": true,
   "description": "Dynamically change Cloud DNS entries",
   "license": "MIT",
   "author": "@zaripych",
@@ -9,6 +10,7 @@
     "prebuild": "node ./scripts/clean.js",
     "build": "node ./scripts/build.js -s",
     "check": "concurrently --raw -c \"node ./scripts/build.js\" \"tsc\" \"eslint . --ext .js,.jsx,.ts,.tsx -f pretty\"",
+    "ci-build-docker": "docker build -t zaripych/$npm_package_name .",
     "clean": "node ./scripts/clean.js",
     "combine-coverage": "node ./scripts/combineCoverage.js",
     "declarations": "tsc -p ./tsconfig.declarations.json",
@@ -18,8 +20,7 @@
     "patch": "ts-deps patch",
     "release": "node ./scripts/release.js",
     "test": "jest --color",
-    "type-check": "tsc",
-    "ci-build-docker": "docker build -t zaripych/$npm_package_name ."
+    "type-check": "tsc"
   },
   "husky": {
     "hooks": {
@@ -36,12 +37,6 @@
       "sort-package-json"
     ]
   },
-  "devDependencies": {
-    "@types/express": "4.17.7",
-    "husky": "4.2.3",
-    "lint-staged": "10.0.8",
-    "ts-deps": "0.15.9"
-  },
   "dependencies": {
     "@types/node-fetch": "2.5.7",
     "@types/wtfnode": "0.7.0",
@@ -50,5 +45,11 @@
     "node-fetch": "2.6.0",
     "rxjs": "6.6.0",
     "wtfnode": "0.8.1"
+  },
+  "devDependencies": {
+    "@types/express": "4.17.7",
+    "husky": "4.2.3",
+    "lint-staged": "10.0.8",
+    "ts-deps": "0.15.9"
   }
 }
