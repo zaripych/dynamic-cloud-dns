@@ -1,5 +1,6 @@
 import express, { ErrorRequestHandler } from 'express';
 import { updateEntry } from './updateDns';
+import { readSecret } from './readSecret';
 
 function validateParams(req: express.Request) {
   const secret = req.query.secret;
@@ -42,7 +43,7 @@ export function expressApp() {
       res.status(500).send({
         status: error.code ?? 500,
         message:
-          (Array.isArray(error.errors) && error.errors[0].message) ??
+          (Array.isArray(error.errors) && error.errors[0].message) ||
           'unexpected something',
       });
       next();
@@ -57,7 +58,9 @@ export function expressApp() {
 async function asyncResponse(req: express.Request) {
   const params = validateParams(req);
 
-  if (params.secret !== process.env.SECRET) {
+  const secret = await readSecret();
+
+  if (params.secret !== secret) {
     return (res: express.Response) => {
       res.status(403).send({
         status: 403,
