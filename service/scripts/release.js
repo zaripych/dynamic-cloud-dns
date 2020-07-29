@@ -3,4 +3,6 @@
 
 const { release } = require('ts-deps');
 
-release();
+release({
+  docker: false
+});
