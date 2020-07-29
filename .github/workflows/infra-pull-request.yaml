@@ -1,0 +1,36 @@
+name: Verify Infra Pull Request
+
+on: [pull_request]
+  paths:
+    - infra/**
+
+jobs:
+  verify-pulumi:
+    runs-on: [ubuntu-latest]
+
+    strategy:
+      matrix:
+        node: ['12']
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v1.1.0
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install Yarn
+        run: npm install -g yarn
+        working-directory: infra
+
+      - name: Pulumi Preview
+        uses: docker://pulumi/actions
+        with:
+          args: preview
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          PULUMI_CI: pr
+          PULUMI_ROOT: infra
