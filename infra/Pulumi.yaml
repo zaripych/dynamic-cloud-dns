@@ -1,0 +1,17 @@
+name: dynamic-cloud-dns
+runtime: nodejs
+description: Dynamic Cloud DNS endpoint deployment
+template:
+  config:
+    gcp:project:
+      description: The Google Cloud project to deploy into
+    dynamic-cloud-dns:location:
+      description: The Google Cloud region of the Cloud Run service
+    dynamic-cloud-dns:imageLocation: 
+      description: Location of the docker image (e.g. gcr.io, asia.gcr.io, ...)
+    dynamic-cloud-dns:dnsEntryUpdateSecret: 
+      description: Secret used to update DNS records
+    dynamic-cloud-dns:serviceSubDomain:
+      description: Sub-domain to register the update service with, service will be available at that specific sub-domain (this prop is optional as not all locations support domain mapping)
+    dynamic-cloud-dns:dnsZone: 
+      description: DNS zone name to be updated, this infra package doesn't create it for you
