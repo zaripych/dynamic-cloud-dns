@@ -22,6 +22,7 @@ jobs:
 
       - name: Install Yarn
         run: npm install -g yarn
+        working-directory: service
 
       - name: Get yarn cache
         id: yarn-cache
@@ -36,12 +37,15 @@ jobs:
 
       - name: Install
         run: yarn install
+        working-directory: service
 
       - name: Checks
         run: yarn run check
+        working-directory: service
 
       - name: Unit Tests
         run: yarn run test --passWithNoTests --coverage
+        working-directory: service
 
   build-docker:
     runs-on: [ubuntu-latest]
@@ -62,6 +66,8 @@ jobs:
 
       - name: Install Yarn
         run: npm install -g yarn
+        working-directory: service
 
       - name: Build Container
         run: yarn run ci-build-docker
+        working-directory: service
