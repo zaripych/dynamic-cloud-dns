@@ -1,8 +1,9 @@
 name: Verify Pull Request
 
-on: [pull_request]
-  paths:
-    - service/**
+on:
+  pull_request:
+    paths:
+      - service/**
 
 jobs:
   build-and-run-checks:
