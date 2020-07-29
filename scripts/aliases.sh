@@ -9,5 +9,5 @@ pulumi() {
          -e PULUMI_ACCESS_TOKEN \
          -w /opt/cwd \
          --entrypoint bash \
-         -ti pulumi/pulumi -c $CMD
+         pulumi/pulumi -c $CMD
 }
