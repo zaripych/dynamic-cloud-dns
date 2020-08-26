@@ -70,7 +70,7 @@ jobs:
         working-directory: service
 
       - name: Copy Infra Project
-        run: ./scripts/checkout-project.sh
+        run: ./scripts/checkout-projects.sh
         working-directory: infra
         env:
           GOOGLE_CLOUD_CREDENTIALS: ${{ secrets.GOOGLE_CLOUD_CREDENTIALS }}
@@ -91,3 +91,4 @@ jobs:
       - name: Cleanup Sensitive
         if: always()
         run: ./scripts/cleanup.sh
+        working-directory: infra
