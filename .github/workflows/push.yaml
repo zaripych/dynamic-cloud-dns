@@ -69,11 +69,14 @@ jobs:
         run: yarn release
         working-directory: service
 
+      - name: Authenticate on GCP
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCP_KEY }}
+
       - name: Copy Infra Project
         run: ./scripts/checkout-projects.sh
         working-directory: infra
-        env:
-          GOOGLE_CLOUD_CREDENTIALS: ${{ secrets.GOOGLE_CLOUD_CREDENTIALS }}
 
       - name: Install Infra
         run: yarn install
