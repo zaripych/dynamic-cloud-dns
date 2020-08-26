@@ -69,6 +69,12 @@ jobs:
         run: yarn release
         working-directory: service
 
+      - name: Copy Infra Project
+        run: ./scripts/checkout-project.sh
+        working-directory: infra
+        env:
+          GOOGLE_CLOUD_CREDENTIALS: ${{ secrets.GOOGLE_CLOUD_CREDENTIALS }}
+
       - name: Install Infra
         run: yarn install
         working-directory: infra
