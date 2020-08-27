@@ -1,6 +1,6 @@
 {
   "name": "dynamic-cloud-dns",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "description": "Dynamically change Cloud DNS entries",
   "license": "MIT",
