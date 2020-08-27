@@ -42,15 +42,15 @@
     "@types/node-fetch": "2.5.7",
     "@types/wtfnode": "0.7.0",
     "express": "4.17.1",
-    "googleapis": "56.0.0",
+    "googleapis": "59.0.0",
     "node-fetch": "2.6.0",
-    "rxjs": "6.6.0",
+    "rxjs": "6.6.2",
     "wtfnode": "0.8.1"
   },
   "devDependencies": {
     "@types/express": "4.17.7",
-    "husky": "4.2.3",
-    "lint-staged": "10.0.8",
-    "ts-deps": "0.15.9"
+    "husky": "4.2.5",
+    "lint-staged": "10.2.13",
+    "ts-deps": "0.16.0"
   }
 }
