@@ -1,11 +1,21 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import * as docker from '@pulumi/docker';
+import { join } from 'path';
 
 const config = new pulumi.Config();
 
+const stack = pulumi.getStack();
+
+function createName(name: string) {
+  if (stack === 'prod') {
+    return name;
+  }
+  return [name, stack].join('-');
+}
+
 const serviceAccount = new gcp.serviceAccount.Account('service-account', {
-  accountId: 'record-update-service-account',
+  accountId: createName('record-update-sa'),
   displayName: 'Dynamic DNS Records Update Service',
   description:
     'Service Account used by Cloud Run service which updates DNS records',
@@ -20,7 +30,7 @@ const dnsAccessForAccount = new gcp.projects.IAMMember(
 );
 
 const secret = new gcp.secretmanager.Secret('secret', {
-  secretId: 'record-update-secret',
+  secretId: createName('record-update-secret'),
   replication: {
     automatic: true,
   },
@@ -51,7 +61,7 @@ const imageName = pulumi.interpolate`${imageLocation}/${gcp.config.project}/dyna
 const dockerImage = new docker.Image('local-service-image', {
   imageName,
   build: {
-    context: '../service',
+    context: join(__dirname, '../service'),
   },
 });
 
