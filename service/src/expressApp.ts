@@ -58,7 +58,7 @@ export function expressApp() {
 }
 
 async function sendVersion(_req: express.Request) {
-  const pkg = (await readJson('../package.json')) as { version?: string };
+  const pkg = (await readJson('./package.json')) as { version?: string };
   return (res: express.Response) => {
     res.status(200).send(pkg.version);
   };
