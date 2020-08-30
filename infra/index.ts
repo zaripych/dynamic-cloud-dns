@@ -2,6 +2,7 @@ import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import * as docker from '@pulumi/docker';
 import { join } from 'path';
+import { spawn } from 'child_process';
 
 const config = new pulumi.Config();
 
@@ -54,16 +55,81 @@ const location = config.get('location') ?? 'us-east1';
 
 const imageLocation = config.get('imageLocation') ?? 'gcr.io';
 
-const imageTag = config.get('serviceImageTag') ?? 'latest';
+const imageTag =
+  config.get('serviceImageTag') ?? stack === 'prod' ? 'latest' : stack;
 
-const imageName = pulumi.interpolate`${imageLocation}/${gcp.config.project}/dynamic-cloud-dns:${imageTag}`;
+const latestPublicImage = pulumi.output(
+  docker.getRegistryImage({
+    name: `zaripych/dynamic-cloud-dns:${stack}`,
+  })
+);
 
-const dockerImage = new docker.Image('local-service-image', {
-  imageName,
-  build: {
-    context: join(__dirname, '../service'),
-  },
-});
+const pulledLocalDockerImage = latestPublicImage.apply(
+  (r) =>
+    new docker.RemoteImage(`public-docker-image`, {
+      name: r.name!,
+      pullTriggers: [r.sha256Digest],
+      keepLocally: true,
+    })
+);
+
+async function tagImage(fromName: string, toName: string) {
+  return new Promise((res, rej) => {
+    const child = spawn('docker', ['tag', fromName, toName]);
+    child.once('close', (code, signal) => {
+      if (code === 0) {
+        pulumi.log.info(`Successfully tagged ${fromName} as ${toName}`);
+        res();
+      } else {
+        rej(
+          typeof code === 'number'
+            ? new Error(`Docker process quit with ${code} code`)
+            : new Error(`Docker process was terminated with ${signal}`)
+        );
+      }
+    });
+    child.once('error', (err) => rej(err));
+  });
+}
+
+function pushImage(imageName: string) {
+  return new Promise((res, rej) => {
+    const child = spawn('docker', ['push', imageName]);
+    child.once('close', (code, signal) => {
+      if (code === 0) {
+        pulumi.log.info(`Successfully pushed ${imageName}`);
+        res();
+      } else {
+        rej(
+          typeof code === 'number'
+            ? new Error(`Docker process quit with ${code} code`)
+            : new Error(`Docker process was terminated with ${signal}`)
+        );
+      }
+    });
+    child.once('error', (err) => rej(err));
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', (chunk: string) => {
+      pulumi.log.info(chunk);
+    });
+    child.once('error', (err) => rej(err));
+    child.stderr.setEncoding('utf8');
+    child.stderr.on('data', (chunk: string) => {
+      pulumi.log.info(chunk);
+    });
+  });
+}
+
+const imageName = pulumi
+  .all([pulledLocalDockerImage.name, latestPublicImage.sha256Digest])
+  .apply(async ([publicName, shaDigest]) => {
+    const sha = shaDigest.substr(8, 20);
+    const tagName = `${imageLocation}/${gcp.config.project}/dynamic-cloud-dns:${imageTag}`;
+    const shaName = `${imageLocation}/${gcp.config.project}/dynamic-cloud-dns@${shaDigest}`;
+    await tagImage(publicName, tagName);
+    await pushImage(tagName);
+    return shaName;
+  });
 
 const service = new gcp.cloudrun.Service('service', {
   location,
