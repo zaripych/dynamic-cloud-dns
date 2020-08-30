@@ -21,15 +21,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v1.1.0
         with:
-          node-version: ${{ matrix.node }}
-
-      - name: Install Yarn
-        run: npm install -g yarn
-        working-directory: service
+          version: ${{ matrix.node }}
 
       - name: Get yarn cache
         id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Install Yarn
+        run: npm install -g yarn
+        working-directory: service
 
       - uses: actions/cache@v1
         with:

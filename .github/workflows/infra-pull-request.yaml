@@ -21,10 +21,27 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v1.1.0
         with:
-          node-version: ${{ matrix.node }}
+          version: ${{ matrix.node }}
+
+      - name: Get yarn cache
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Authenticate on GCP
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCP_KEY }}
+
+      - name: Copy Infra Project
+        run: ./scripts/checkout-projects.sh
+        working-directory: infra
 
       - name: Install Yarn
         run: npm install -g yarn
+        working-directory: infra
+
+      - name: Mask Sensitive
+        run: node ./scripts/masks.js
         working-directory: infra
 
       - name: Pulumi Preview
