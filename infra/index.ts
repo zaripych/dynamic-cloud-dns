@@ -1,7 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import * as docker from '@pulumi/docker';
-import { join } from 'path';
 import { spawn } from 'child_process';
 
 const config = new pulumi.Config();
@@ -181,7 +180,7 @@ const serviceSubDomain = config.get('serviceSubDomain');
 
 const serviceDomainMapping =
   (!!serviceSubDomain &&
-    new gcp.cloudrun.DomainMapping('service-domain', {
+    new gcp.cloudrun.DomainMapping('cloudrun-service-domain', {
       location,
       name: dnsZone.then(
         (zone) => `${serviceSubDomain}.${removeTrailingDot(zone.dnsName)}`

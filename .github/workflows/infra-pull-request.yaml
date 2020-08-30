@@ -1,8 +1,9 @@
 name: Verify Infra Pull Request
 
-on: [pull_request]
-  paths:
-    - infra/**
+on:
+  pull_request:
+    paths:
+      - infra/**
 
 jobs:
   verify-pulumi:

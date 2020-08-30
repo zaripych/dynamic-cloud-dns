@@ -82,6 +82,10 @@ jobs:
         run: yarn install
         working-directory: infra
 
+      - name: Mask Sensitive
+        run: node ./scripts/mask.js
+        working-directory: infra
+
       - name: Pulumi Preview
         uses: docker://pulumi/actions
         with:
