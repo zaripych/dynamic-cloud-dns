@@ -61,5 +61,6 @@ jobs:
           args: preview
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_KEY }}
           PULUMI_CI: pr
           PULUMI_ROOT: infra
