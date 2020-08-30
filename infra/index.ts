@@ -59,7 +59,7 @@ const imageTag =
 
 const latestPublicImage = pulumi.output(
   docker.getRegistryImage({
-    name: `zaripych/dynamic-cloud-dns:${stack}`,
+    name: `zaripych/dynamic-cloud-dns:${imageTag}`,
   })
 );
 
