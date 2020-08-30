@@ -72,31 +72,12 @@ const pulledLocalDockerImage = latestPublicImage.apply(
     })
 );
 
-async function tagImage(fromName: string, toName: string) {
+async function runDocker(args: string[]) {
   return new Promise((res, rej) => {
-    const child = spawn('docker', ['tag', fromName, toName]);
+    const child = spawn('docker', args);
     child.once('close', (code, signal) => {
       if (code === 0) {
-        pulumi.log.info(`Successfully tagged ${fromName} as ${toName}`);
-        res();
-      } else {
-        rej(
-          typeof code === 'number'
-            ? new Error(`Docker process quit with ${code} code`)
-            : new Error(`Docker process was terminated with ${signal}`)
-        );
-      }
-    });
-    child.once('error', (err) => rej(err));
-  });
-}
-
-function pushImage(imageName: string) {
-  return new Promise((res, rej) => {
-    const child = spawn('docker', ['push', imageName]);
-    child.once('close', (code, signal) => {
-      if (code === 0) {
-        pulumi.log.info(`Successfully pushed ${imageName}`);
+        pulumi.log.info(`Successfully run "docker ${args.join(' ')}"`);
         res();
       } else {
         rej(
@@ -119,10 +100,17 @@ function pushImage(imageName: string) {
   });
 }
 
+async function tagImage(fromName: string, toName: string) {
+  return runDocker(['tag', fromName, toName]);
+}
+
+function pushImage(imageName: string) {
+  return runDocker(['push', imageName]);
+}
+
 const imageName = pulumi
   .all([pulledLocalDockerImage.name, latestPublicImage.sha256Digest])
   .apply(async ([publicName, shaDigest]) => {
-    const sha = shaDigest.substr(8, 20);
     const tagName = `${imageLocation}/${gcp.config.project}/dynamic-cloud-dns:${imageTag}`;
     const shaName = `${imageLocation}/${gcp.config.project}/dynamic-cloud-dns@${shaDigest}`;
     await tagImage(publicName, tagName);
