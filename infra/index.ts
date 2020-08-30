@@ -1,7 +1,7 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import * as docker from '@pulumi/docker';
-import { spawn } from 'child_process';
+import { PushDockerImage } from './pushDockerImage';
 
 const config = new pulumi.Config();
 
@@ -72,54 +72,10 @@ const pulledLocalDockerImage = latestPublicImage.apply(
     })
 );
 
-async function runDocker(args: string[]) {
-  return new Promise((res, rej) => {
-    const child = spawn('docker', args);
-    child.once('close', (code, signal) => {
-      if (code === 0) {
-        pulumi.log.info(`Successfully run "docker ${args.join(' ')}"`);
-        res();
-      } else {
-        rej(
-          typeof code === 'number'
-            ? new Error(`Docker process quit with ${code} code`)
-            : new Error(`Docker process was terminated with ${signal}`)
-        );
-      }
-    });
-    child.once('error', (err) => rej(err));
-    child.stdout.setEncoding('utf8');
-    child.stdout.on('data', (chunk: string) => {
-      pulumi.log.info(chunk);
-    });
-    child.once('error', (err) => rej(err));
-    child.stderr.setEncoding('utf8');
-    child.stderr.on('data', (chunk: string) => {
-      pulumi.log.info(chunk);
-    });
-  });
-}
-
-async function tagImage(fromName: string, toName: string) {
-  return runDocker(['tag', fromName, toName]);
-}
-
-function pushImage(imageName: string) {
-  return runDocker(['push', imageName]);
-}
-
-const imageName = pulumi
-  .all([pulledLocalDockerImage.name, latestPublicImage.sha256Digest])
-  .apply(async ([publicName, shaDigest]) => {
-    const tagName = `${imageLocation}/${gcp.config.project}/dynamic-cloud-dns:${imageTag}`;
-    const shaName = `${imageLocation}/${gcp.config.project}/dynamic-cloud-dns@${shaDigest}`;
-    if (!pulumi.runtime.isDryRun()) {
-      // quick and dirty way of pushing existing docker image to GCP
-      await tagImage(publicName, tagName);
-      await pushImage(tagName);
-    }
-    return shaName;
-  });
+const pushedDockerImage = new PushDockerImage('remote-docker-image', {
+  sourceImage: pulledLocalDockerImage.name,
+  targetImage: pulumi.interpolate`${imageLocation}/${gcp.config.project}/dynamic-cloud-dns:${imageTag}`,
+});
 
 const service = new gcp.cloudrun.Service('service', {
   location,
@@ -127,7 +83,7 @@ const service = new gcp.cloudrun.Service('service', {
     spec: {
       containers: [
         {
-          image: imageName,
+          image: pushedDockerImage.imageNameWithDigest,
           envs: [
             {
               name: 'PROJECT_ID',
