@@ -83,7 +83,7 @@ jobs:
         working-directory: infra
 
       - name: Mask Sensitive
-        run: node ./scripts/mask.js
+        run: node ./scripts/masks.js
         working-directory: infra
 
       - name: Pulumi Preview
