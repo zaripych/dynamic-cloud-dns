@@ -23,9 +23,24 @@ jobs:
         with:
           version: ${{ matrix.node }}
 
+      - name: Install Yarn
+        run: npm install -g yarn
+        working-directory: infra
+    
       - name: Get yarn cache
         id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install
+        run: yarn install
+        working-directory: infra
 
       - name: Authenticate on GCP
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
@@ -34,10 +49,6 @@ jobs:
 
       - name: Copy Infra Project
         run: ./scripts/checkout-projects.sh
-        working-directory: infra
-
-      - name: Install Yarn
-        run: npm install -g yarn
         working-directory: infra
 
       - name: Mask Sensitive
