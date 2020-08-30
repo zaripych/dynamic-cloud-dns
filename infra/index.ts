@@ -113,8 +113,11 @@ const imageName = pulumi
   .apply(async ([publicName, shaDigest]) => {
     const tagName = `${imageLocation}/${gcp.config.project}/dynamic-cloud-dns:${imageTag}`;
     const shaName = `${imageLocation}/${gcp.config.project}/dynamic-cloud-dns@${shaDigest}`;
-    await tagImage(publicName, tagName);
-    await pushImage(tagName);
+    if (!pulumi.runtime.isDryRun()) {
+      // quick and dirty way of pushing existing docker image to GCP
+      await tagImage(publicName, tagName);
+      await pushImage(tagName);
+    }
     return shaName;
   });
 
