@@ -157,9 +157,11 @@ const servicePublicAccess = new gcp.cloudrun.IamMember(
   }
 );
 
-const dnsZone = gcp.dns.getManagedZone({
-  name: config.require('dnsZone'),
-});
+const dnsZone = pulumi.output(
+  gcp.dns.getManagedZone({
+    name: config.require('dnsZone'),
+  })
+);
 
 function removeTrailingDot(dnsName: string) {
   return dnsName.replace(/\.$/, '');
@@ -169,18 +171,24 @@ const serviceSubDomain = config.get('serviceSubDomain');
 
 const serviceDomainMapping =
   (!!serviceSubDomain &&
-    new gcp.cloudrun.DomainMapping('cloudrun-service-domain', {
-      location,
-      name: dnsZone.then(
-        (zone) => `${serviceSubDomain}.${removeTrailingDot(zone.dnsName)}`
-      ),
-      spec: {
-        routeName: service.name,
+    new gcp.cloudrun.DomainMapping(
+      'cloudrun-service-domain',
+      {
+        location,
+        name: pulumi.interpolate`${serviceSubDomain}.${dnsZone.dnsName.apply(
+          removeTrailingDot
+        )}`,
+        spec: {
+          routeName: service.name,
+        },
+        metadata: {
+          namespace: gcp.config.project!,
+        },
       },
-      metadata: {
-        namespace: gcp.config.project!,
-      },
-    })) ||
+      {
+        deleteBeforeReplace: true,
+      }
+    )) ||
   null;
 
 const serviceDomainMappingRecords =
@@ -191,7 +199,7 @@ const serviceDomainMappingRecords =
         (record) =>
           new gcp.dns.RecordSet('service-domain-entries', {
             managedZone: config.require('dnsZone'),
-            name: dnsZone.then((zone) => `${record.name}.${zone.dnsName}`),
+            name: pulumi.interpolate`${record.name}.${dnsZone.dnsName}`,
             ttl: 5 * 60,
             type: record.type ?? 'CNAME',
             rrdatas: [record.rrdata],
