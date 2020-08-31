@@ -1,0 +1,66 @@
+name: Verify Infra Pull Request
+
+on:
+  pull_request:
+    paths:
+      - infra/**
+
+jobs:
+  verify-pulumi:
+    runs-on: [ubuntu-latest]
+
+    strategy:
+      matrix:
+        node: ['12']
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v1.1.0
+        with:
+          version: ${{ matrix.node }}
+
+      - name: Install Yarn
+        run: npm install -g yarn
+        working-directory: infra
+    
+      - name: Get yarn cache
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install
+        run: yarn install
+        working-directory: infra
+
+      - name: Authenticate on GCP
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCP_KEY }}
+
+      - name: Copy Infra Project
+        run: ./scripts/checkout-projects.sh
+        working-directory: infra
+
+      - name: Mask Sensitive
+        run: node ./scripts/masks.js
+        working-directory: infra
+
+      - name: Pulumi Preview
+        uses: docker://pulumi/actions
+        with:
+          args: preview
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_KEY }}
+          PULUMI_CI: pr
+          PULUMI_ROOT: infra

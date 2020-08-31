@@ -1,6 +1,9 @@
 name: Verify Pull Request
 
-on: [pull_request]
+on:
+  pull_request:
+    paths:
+      - service/**
 
 jobs:
   build-and-run-checks:
@@ -11,17 +14,18 @@ jobs:
         node: ['12']
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 1
 
       - name: Setup Node
         uses: actions/setup-node@v1.1.0
         with:
-          node-version: ${{ matrix.node }}
+          version: ${{ matrix.node }}
 
       - name: Install Yarn
         run: npm install -g yarn
+        working-directory: service
 
       - name: Get yarn cache
         id: yarn-cache
@@ -36,12 +40,15 @@ jobs:
 
       - name: Install
         run: yarn install
+        working-directory: service
 
       - name: Checks
         run: yarn run check
+        working-directory: service
 
       - name: Unit Tests
         run: yarn run test --passWithNoTests --coverage
+        working-directory: service
 
   build-docker:
     runs-on: [ubuntu-latest]
@@ -51,17 +58,19 @@ jobs:
         node: ['12']
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 1
 
       - name: Setup Node
         uses: actions/setup-node@v1.1.0
         with:
-          node-version: ${{ matrix.node }}
+          version: ${{ matrix.node }}
 
       - name: Install Yarn
         run: npm install -g yarn
+        working-directory: service
 
       - name: Build Container
         run: yarn run ci-build-docker
+        working-directory: service

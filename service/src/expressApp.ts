@@ -1,5 +1,7 @@
 import express, { ErrorRequestHandler } from 'express';
 import { updateEntry } from './updateDns';
+import { readSecret } from './readSecret';
+import { readJson } from 'fs-extra';
 
 function validateParams(req: express.Request) {
   const secret = req.query.secret;
@@ -27,7 +29,8 @@ function validateParams(req: express.Request) {
 export function expressApp() {
   const app = express();
 
-  app.get('/update', processAsyncResponse);
+  app.get('/update', processAsyncResponse(updateDnsRecord));
+  app.get('/version', processAsyncResponse(sendVersion));
   app.use(((err, _req, res, next) => {
     if (err) {
       console.error(err);
@@ -42,7 +45,7 @@ export function expressApp() {
       res.status(500).send({
         status: error.code ?? 500,
         message:
-          (Array.isArray(error.errors) && error.errors[0].message) ??
+          (Array.isArray(error.errors) && error.errors[0].message) ||
           'unexpected something',
       });
       next();
@@ -54,10 +57,19 @@ export function expressApp() {
   return app;
 }
 
-async function asyncResponse(req: express.Request) {
+async function sendVersion(_req: express.Request) {
+  const pkg = (await readJson('./package.json')) as { version?: string };
+  return (res: express.Response) => {
+    res.status(200).send(pkg.version);
+  };
+}
+
+async function updateDnsRecord(req: express.Request) {
   const params = validateParams(req);
 
-  if (params.secret !== process.env.SECRET) {
+  const secret = await readSecret();
+
+  if (params.secret !== secret) {
     return (res: express.Response) => {
       res.status(403).send({
         status: 403,
@@ -78,12 +90,12 @@ async function asyncResponse(req: express.Request) {
   };
 }
 
-function processAsyncResponse(
+const processAsyncResponse = (fn: typeof updateDnsRecord) => (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
-) {
-  asyncResponse(req)
+) => {
+  fn(req)
     .then((handler) => handler(res))
     .catch(next);
-}
+};

@@ -1,0 +1,8 @@
+/bin/
+/node_modules/
+.log
+
+Pulumi.*.yaml
+
+.#*
+#*
