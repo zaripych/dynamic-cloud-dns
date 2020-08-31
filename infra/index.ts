@@ -14,6 +14,21 @@ function createName(name: string) {
   return [name, stack].join('-');
 }
 
+const iamService = new gcp.projects.Service('iam-service', {
+  service: 'iam.googleapis.com',
+  disableOnDestroy: false,
+});
+
+const runService = new gcp.projects.Service('run-service', {
+  service: 'run.googleapis.com',
+  disableOnDestroy: false,
+});
+
+const secretsService = new gcp.projects.Service('secrets-service', {
+  service: 'secretmanager.googleapis.com',
+  disableOnDestroy: false,
+});
+
 const serviceAccount = new gcp.serviceAccount.Account('service-account', {
   accountId: createName('record-update-sa'),
   displayName: 'Dynamic DNS Records Update Service',
