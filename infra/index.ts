@@ -14,10 +14,21 @@ function createName(name: string) {
   return [name, stack].join('-');
 }
 
-const iamService = new gcp.projects.Service('iam-service', {
-  service: 'iam.googleapis.com',
+const resourceService = new gcp.projects.Service('resource-service', {
+  service: 'cloudresourcemanager.googleapis.com',
   disableOnDestroy: false,
 });
+
+const iamService = new gcp.projects.Service(
+  'iam-service',
+  {
+    service: 'iam.googleapis.com',
+    disableOnDestroy: false,
+  },
+  {
+    dependsOn: [resourceService],
+  }
+);
 
 const runService = new gcp.projects.Service('run-service', {
   service: 'run.googleapis.com',
@@ -29,12 +40,18 @@ const secretsService = new gcp.projects.Service('secrets-service', {
   disableOnDestroy: false,
 });
 
-const serviceAccount = new gcp.serviceAccount.Account('service-account', {
-  accountId: createName('record-update-sa'),
-  displayName: 'Dynamic DNS Records Update Service',
-  description:
-    'Service Account used by Cloud Run service which updates DNS records',
-});
+const serviceAccount = new gcp.serviceAccount.Account(
+  'service-account',
+  {
+    accountId: createName('record-update-sa'),
+    displayName: 'Dynamic DNS Records Update Service',
+    description:
+      'Service Account used by Cloud Run service which updates DNS records',
+  },
+  {
+    dependsOn: [iamService],
+  }
+);
 
 const dnsAccessForAccount = new gcp.projects.IAMMember(
   'service-account-dns-access',
@@ -44,12 +61,18 @@ const dnsAccessForAccount = new gcp.projects.IAMMember(
   }
 );
 
-const secret = new gcp.secretmanager.Secret('secret', {
-  secretId: createName('record-update-secret'),
-  replication: {
-    automatic: true,
+const secret = new gcp.secretmanager.Secret(
+  'secret',
+  {
+    secretId: createName('record-update-secret'),
+    replication: {
+      automatic: true,
+    },
   },
-});
+  {
+    dependsOn: [secretsService],
+  }
+);
 
 const secretValue = new gcp.secretmanager.SecretVersion('secret-value', {
   secret: secret.id,
@@ -90,33 +113,39 @@ const pushedDockerImage = new PushDockerImage('remote-docker-image', {
   )}`,
 });
 
-const service = new gcp.cloudrun.Service('service', {
-  location,
-  template: {
-    spec: {
-      containers: [
-        {
-          image: pushedDockerImage.imageNameWithDigest,
-          envs: [
-            {
-              name: 'PROJECT_ID',
-              value: gcp.config.project,
-            },
-            {
-              name: 'ZONE',
-              value: config.require('dnsZone'),
-            },
-            {
-              name: 'SECRET',
-              value: secretValue.id,
-            },
-          ],
-        },
-      ],
-      serviceAccountName: serviceAccount.accountId,
+const service = new gcp.cloudrun.Service(
+  'service',
+  {
+    location,
+    template: {
+      spec: {
+        containers: [
+          {
+            image: pushedDockerImage.imageNameWithDigest,
+            envs: [
+              {
+                name: 'PROJECT_ID',
+                value: gcp.config.project,
+              },
+              {
+                name: 'ZONE',
+                value: config.require('dnsZone'),
+              },
+              {
+                name: 'SECRET',
+                value: secretValue.id,
+              },
+            ],
+          },
+        ],
+        serviceAccountName: serviceAccount.accountId,
+      },
     },
   },
-});
+  {
+    dependsOn: [runService],
+  }
+);
 
 const servicePublicAccess = new gcp.cloudrun.IamMember(
   'service-public-access',
