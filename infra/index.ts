@@ -57,24 +57,22 @@ const imageLocation = config.get('imageLocation') ?? 'gcr.io';
 const imageTag =
   config.get('serviceImageTag') ?? stack === 'prod' ? 'latest' : stack;
 
+const imageName = `zaripych/dynamic-cloud-dns:${imageTag}`;
+
 const latestPublicImage = pulumi.output(
   docker.getRegistryImage({
-    name: `zaripych/dynamic-cloud-dns:${imageTag}`,
+    name: imageName,
   })
 );
 
-const pulledLocalDockerImage = latestPublicImage.apply(
-  (r) =>
-    new docker.RemoteImage(`public-docker-image`, {
-      name: r.name!,
-      pullTriggers: [r.sha256Digest],
-      keepLocally: true,
-    })
-);
-
 const pushedDockerImage = new PushDockerImage('remote-docker-image', {
-  sourceImage: pulledLocalDockerImage.name,
-  targetImage: pulumi.interpolate`${imageLocation}/${gcp.config.project}/dynamic-cloud-dns:${imageTag}`,
+  sourceImage: imageName,
+  pullTriggers: [latestPublicImage.sha256Digest],
+  targetImage: pulumi.interpolate`${imageLocation}/${
+    gcp.config.project
+  }/dynamic-cloud-dns:${imageTag}-${latestPublicImage.sha256Digest.apply(
+    (sha) => sha.substring(7, 20)
+  )}`,
 });
 
 const service = new gcp.cloudrun.Service('service', {

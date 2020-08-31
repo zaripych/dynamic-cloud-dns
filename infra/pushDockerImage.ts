@@ -4,22 +4,36 @@ import { format } from 'util';
 
 type PushDockerImageInputArgs = {
   sourceImage: pulumi.Input<string>;
+  pullTriggers: pulumi.Input<pulumi.Input<string>[]>;
   targetImage: pulumi.Input<string>;
 };
 
 type InputArgs = {
   sourceImage: string;
+  pullTriggers: string[];
   targetImage: string;
 };
 
 type OutputArgs = {
   sourceImage: string;
+  pullTriggers: string[];
   targetImage: string;
   shaDigest: string;
   imageNameWithDigest: string;
 };
 
-async function runDocker(args: string[]) {
+function log(
+  { verbose = false },
+  ...parameters: Parameters<typeof console.log>
+) {
+  if (verbose) {
+    pulumi.log.info(format(...parameters));
+  } else {
+    pulumi.log.debug(format(...parameters));
+  }
+}
+
+async function runDocker(args: string[], { verbose = false } = {}) {
   return new Promise<{ stdout: string; stderr: string }>((res, rej) => {
     const child = spawn('docker', args);
     const output: string[] = [];
@@ -42,28 +56,28 @@ async function runDocker(args: string[]) {
     child.once('error', (err) => rej(err));
     child.stdout.setEncoding('utf8');
     child.stdout.on('data', (chunk: string) => {
-      pulumi.log.debug(chunk);
+      log({ verbose }, chunk);
       output.push(chunk);
     });
     child.once('error', (err) => rej(err));
     child.stderr.setEncoding('utf8');
     child.stderr.on('data', (chunk: string) => {
-      pulumi.log.debug(chunk);
+      log({ verbose }, chunk);
       errors.push(chunk);
     });
   });
 }
 
 function pullImage(imageName: string) {
-  return runDocker(['pull', imageName]);
+  return runDocker(['pull', imageName], { verbose: true });
 }
 
 function tagImage(fromName: string, toName: string) {
-  return runDocker(['tag', fromName, toName]);
+  return runDocker(['tag', fromName, toName], { verbose: true });
 }
 
 function pushImage(imageName: string) {
-  return runDocker(['push', imageName]);
+  return runDocker(['push', imageName], { verbose: true });
 }
 
 async function getSha(imageName: string) {
@@ -77,16 +91,19 @@ async function getSha(imageName: string) {
       'Docker inspect command returned something unusual: ' + result.stdout
     );
   }
-  const shaDigest = data[0].Id;
-  if (!shaDigest) {
-    throw new Error(
-      'Docker inspect command returned something unusual: ' + result.stdout
-    );
-  }
   const imageNameLookup = /([^@:]+)(@|:)?/.exec(imageName);
   if (!imageNameLookup) {
     throw new Error('Image name is not ok: ' + imageName);
   }
+  const repoDigest =
+    data[0].RepoDigests?.filter((item) => item.startsWith(item))[0] ?? '';
+  const shaLookup = /sha256:.*/.exec(repoDigest);
+  if (!shaLookup) {
+    throw new Error(
+      'Docker inspect command returned something unusual: ' + result.stdout
+    );
+  }
+  const shaDigest = shaLookup[0];
   const imageNameWithDigest = `${imageNameLookup[1]}@${shaDigest}`;
   return {
     shaDigest,
@@ -150,6 +167,18 @@ class PushDockerImageResourceProvider
     news: InputArgs
   ): Promise<pulumi.dynamic.DiffResult> {
     const replaces: string[] = [];
+
+    if (news.pullTriggers?.length !== olds.pullTriggers?.length) {
+      replaces.push('pullTriggers');
+    } else {
+      if (
+        news.pullTriggers?.some(
+          (trigger, i) => trigger !== olds.pullTriggers[i]
+        )
+      ) {
+        replaces.push('pullTriggers');
+      }
+    }
 
     if (news.targetImage !== olds.targetImage) {
       replaces.push('targetImage');
