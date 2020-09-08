@@ -40,7 +40,7 @@ const secretsService = new gcp.projects.Service('secrets-service', {
   disableOnDestroy: false,
 });
 
-const serviceAccount = new gcp.serviceAccount.Account(
+const serviceAccount = new gcp.serviceaccount.Account(
   'service-account',
   {
     accountId: createName('record-update-sa'),
@@ -171,24 +171,19 @@ const serviceSubDomain = config.get('serviceSubDomain');
 
 const serviceDomainMapping =
   (!!serviceSubDomain &&
-    new gcp.cloudrun.DomainMapping(
-      'cloudrun-service-domain',
-      {
-        location,
-        name: pulumi.interpolate`${serviceSubDomain}.${dnsZone.dnsName.apply(
-          removeTrailingDot
-        )}`,
-        spec: {
-          routeName: service.name,
-        },
-        metadata: {
-          namespace: gcp.config.project!,
-        },
+    new gcp.cloudrun.DomainMapping('cloudrun-service-domain', {
+      location,
+      name: pulumi.interpolate`${serviceSubDomain}.${dnsZone.dnsName.apply(
+        removeTrailingDot
+      )}`,
+      spec: {
+        routeName: service.name,
+        forceOverride: false,
       },
-      {
-        deleteBeforeReplace: true,
-      }
-    )) ||
+      metadata: {
+        namespace: gcp.config.project!,
+      },
+    })) ||
   null;
 
 const serviceDomainMappingRecords =

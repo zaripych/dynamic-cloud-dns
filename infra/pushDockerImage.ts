@@ -203,44 +203,11 @@ class PushDockerImageResourceProvider
       outs: {
         sourceImage: inputs.sourceImage,
         targetImage: inputs.targetImage,
+        pullTriggers: inputs.pullTriggers,
         shaDigest,
         imageNameWithDigest,
       },
     };
-  }
-
-  async read(
-    id: string,
-    props?: OutputArgs
-  ): Promise<pulumi.dynamic.ReadResult> {
-    return {
-      id,
-      props,
-    };
-  }
-
-  async update(
-    _id: string,
-    olds: OutputArgs,
-    news: InputArgs
-  ): Promise<pulumi.dynamic.UpdateResult> {
-    await pullImage(olds.sourceImage);
-    await tagImage(news.sourceImage, news.targetImage);
-    await pushImage(news.targetImage);
-    const { shaDigest, imageNameWithDigest } = await getSha(news.targetImage);
-    return {
-      outs: {
-        sourceImage: news.sourceImage,
-        targetImage: news.targetImage,
-        shaDigest,
-        imageNameWithDigest,
-      },
-    };
-  }
-
-  async delete(_id: string, props: OutputArgs): Promise<void> {
-    // should we cleanup the target repo here?
-    // what if there are other services still using older image versions?
   }
 }
 
@@ -252,7 +219,7 @@ export class PushDockerImage extends pulumi.dynamic.Resource {
   ) {
     super(
       new PushDockerImageResourceProvider(name),
-      `zaripych:docker:PushDockerImage:${name}`,
+      name,
       { ...args, shaDigest: undefined, imageNameWithDigest: undefined },
       opts
     );
@@ -262,6 +229,7 @@ export class PushDockerImage extends pulumi.dynamic.Resource {
 export declare interface PushDockerImage {
   readonly sourceImage: pulumi.Output<string>;
   readonly targetImage: pulumi.Output<string>;
+  readonly pullTriggers: pulumi.Output<string[]>;
   readonly shaDigest: pulumi.Output<string>;
   readonly imageNameWithDigest: pulumi.Output<string>;
 }

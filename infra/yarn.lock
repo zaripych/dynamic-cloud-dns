@@ -62,22 +62,41 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@pulumi/docker@^2.2.3":
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/@pulumi/docker/-/docker-2.2.3.tgz#5d3ecad832b43e3ab8c0ee782127c918412f30f4"
-  integrity sha512-dhrKyN3HLJk1nXjuy08edwYV44t+s+b9RzdTVetHaCd5xYflMVKzdB0L5JphAO0bPgWhQtHzzFvVy3avCl9kDQ==
+"@pulumi/docker@2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/docker/-/docker-2.3.0.tgz#7c48f052f8b70a0e2bb51086a1af8bf6687c4a08"
+  integrity sha512-cmCPrp4H42YoXOOqHBHrnzkb8/cBbet1G74LunQLo7q4+z/sV+YZiycNtTysKCsNEeb5SAQ+7hS7iQACElmUoQ==
   dependencies:
     "@pulumi/pulumi" "^2.0.0"
     semver "^5.4.0"
 
-"@pulumi/gcp@^3.0.0":
-  version "3.15.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/gcp/-/gcp-3.15.0.tgz#fbfa5103f190b5518c89ece060667e7865b0b1e2"
-  integrity sha512-oRotHCBmze9qMP6PPnRZhD6B4spYvXKF3CIpjBRnxebcHpObtZG9MrgOE5ctcIVMWZoON7UMDPGj14OU8QX4gg==
+"@pulumi/gcp@3.22.0":
+  version "3.22.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/gcp/-/gcp-3.22.0.tgz#ea67efd4cbea03a881636a1a580fb43b47459c31"
+  integrity sha512-eGduY58lt1zLhBkm2CA/272sP0qv66ZL2DOvjgHj0FhKZaR6cdf/8/dyEAe4sI1/fMdZ6a352nAesNwp4kBtiQ==
   dependencies:
     "@pulumi/pulumi" "^2.0.0"
     "@types/express" "^4.16.0"
     read-package-json "^2.0.13"
+
+"@pulumi/pulumi@2.9.2":
+  version "2.9.2"
+  resolved "https://registry.yarnpkg.com/@pulumi/pulumi/-/pulumi-2.9.2.tgz#824287a69712832297c4d4566264cb7d8e9e4156"
+  integrity sha512-tN1hFrxMiZ/Jtcrb3j899pXzdHPS7j1/3XRdJ0z9HDDvbkNvYbhYRS0CASqywEF93EiKqUWyomzwG33s4hinsQ==
+  dependencies:
+    "@grpc/grpc-js" "^0.6.15"
+    "@pulumi/query" "^0.3.0"
+    google-protobuf "^3.5.0"
+    minimist "^1.2.0"
+    normalize-package-data "^2.4.0"
+    protobufjs "^6.8.6"
+    read-package-tree "^5.3.1"
+    require-from-string "^2.0.1"
+    semver "^6.1.0"
+    source-map-support "^0.4.16"
+    ts-node "^7.0.1"
+    typescript "~3.7.3"
+    upath "^1.1.0"
 
 "@pulumi/pulumi@^2.0.0":
   version "2.7.1"
@@ -152,10 +171,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.26.tgz#22a3b8a46510da8944b67bfc27df02c34a35331c"
   integrity sha512-W+fpe5s91FBGE0pEa0lnqGLL4USgpLgs4nokw16SrBBco/gQxuua7KnArSEOd5iaMqbbSHV10vUDkJYJJqpXKA==
 
-"@types/node@^10.0.0":
-  version "10.17.28"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.28.tgz#0e36d718a29355ee51cec83b42d921299200f6d9"
-  integrity sha512-dzjES1Egb4c1a89C7lKwQh8pwjYmlOAG9dW1pBgxEk57tMrLnssOfEthz8kdkNaBd7lIqQx7APm5+mZ619IiCQ==
+"@types/node@10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.0.0.tgz#c40f8e07dce607d3ef25a626b93a6a7cdcf97881"
+  integrity sha512-kctoM36XiNZT86a7tPsUje+Q/yl+dqELjtYApi0T5eOQ90Elhu0MI10rmYk44yEP4v1jdDvtjQ9DFtpRtHf2Bw==
 
 "@types/node@^13.7.0":
   version "13.13.15"
@@ -362,7 +381,7 @@ is-symbol@^1.0.2:
   dependencies:
     has-symbols "^1.0.1"
 
-js-yaml@^3.14.0:
+js-yaml@3.14.0:
   version "3.14.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.14.0.tgz#a7a34170f26a21bb162424d8adacb4113a69e482"
   integrity sha512-/4IbIeHcD9VMHFqDR/gQ7EdZdLimOvW2DdcxFjdyyZ9NsbS+ccrXqVWDtab/lRl5AlUqmpBx8EhPaWR+OtY17A==
@@ -464,10 +483,10 @@ path-parse@^1.0.6:
   resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.6.tgz#d62dbb5679405d72c4737ec58600e9ddcf06d24c"
   integrity sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
 
-prettier@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.0.5.tgz#d6d56282455243f2f92cc1716692c08aa31522d4"
-  integrity sha512-7PtVymN48hGcO4fGjybyBSIWDsLU4H4XlvOHfq91pz9kkGlonzwTfYkaIEwiRg/dAJF9YlbsduBAgtYLi+8cFg==
+prettier@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.1.1.tgz#d9485dd5e499daa6cb547023b87a6cf51bee37d6"
+  integrity sha512-9bY+5ZWCfqj3ghYBLxApy2zf6m+NJo5GzmLTpr9FsApsfjriNnS2dahWReHMi7qNPhhHl9SYHJs2cHZLgexNIw==
 
 protobufjs@^6.8.6:
   version "6.10.1"
