@@ -58,7 +58,7 @@ jobs:
       - name: Pulumi Preview
         uses: docker://pulumi/actions
         with:
-          args: preview
+          args: preview --suppress-outputs
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_KEY }}
