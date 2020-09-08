@@ -13,12 +13,15 @@ Instead of running a server constantly though, I've decided to go with managed D
 
 ## Want your own dynamic DNS?
 
+1. Note that spinning up your own Dynamic DNS incurs payment to Google Cloud Platform. Though it should be negligable (e.g. around ~0.5 USD a month) - check pricing on GCP.
+
+1. To understand what kind of resources are going to be created on GCP, have a look at `./infra/index.ts`. 
+
 1. Login to GCP and [create a project](https://cloud.google.com/resource-manager/docs/creating-managing-projects). Remember your project id as you will need it later.
 
 1. [Create Cloud DNS zone](https://cloud.google.com/dns/docs/zones). Remember your zone id as you will need it later.
 
 1. If you have Docker installed and familiar with it, you can use bash shell aliases below in your `.zshrc` or `.bashrc` files. Otherwise, install Pulimi CLI and GCloud as documented: [pulumi](https://www.pulumi.com/docs/get-started/gcp/) and [gcloud](https://cloud.google.com/sdk/gcloud/). 
-
 ```
 gcloud() {
   CMD="gcloud $@"
@@ -48,7 +51,6 @@ pulumi() {
 1. Login to [GCloud](https://www.pulumi.com/docs/intro/cloud-providers/gcp/setup/)
 
 1. Run following commands to login to Pulumi, create your stack and spin-up everything:
-
 ```
 mkdir gcp-ddns && cd gcp-ddns
 pulumi new https://github.com/zaripych/dynamic-cloud-dns/infra -s prod
@@ -58,7 +60,6 @@ pulumi up
 1. Now, if everything is successfull, your Dynamic DNS can be updated using Cloud Run function. Run `pulumi stack output directUrl -s prod` to know the URL you should use to access your service.
 
 1. Test if your service works by running:
-
 ```
 curl $URL/version
 curl $URL/update?secret=$SECRET&domain=$DOMAIN&ip=$IP
