@@ -13,7 +13,7 @@ Instead of running a server constantly though, I've decided to go with managed D
 
 ## Want your own dynamic DNS?
 
-1. Note that spinning up your own Dynamic DNS incurs payment to Google Cloud Platform. Though it should be negligable (e.g. around ~0.5 USD a month) - check pricing on GCP.
+1. Note that spinning up your own Dynamic DNS incurs payment to Google Cloud Platform. Though it should be negligible (e.g. around ~0.5 USD a month) - check pricing on GCP.
 
 1. To understand what kind of resources are going to be created on GCP, have a look at `./infra/index.ts`. 
 
